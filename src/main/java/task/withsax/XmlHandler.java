@@ -2,15 +2,14 @@ package task.withsax;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Если все элементы с данными, то лучше использовать код из под комментариев. В
- * этом случае избавимся от ArrayList-a
+ * этом случае избавимся от HashSett-a
  **/
 
 public class XmlHandler extends DefaultHandler {
@@ -18,9 +17,9 @@ public class XmlHandler extends DefaultHandler {
 	private String csvPath;
 	private String firstElement;
 	private String seperator;
-	
+
 	// Названия тегов у которых есть данные
-	private List<String> tags = null;
+	private HashSet<String> tags = null;
 
 	private FileWriter csvSource = null;
 
@@ -35,7 +34,7 @@ public class XmlHandler extends DefaultHandler {
 	@Override
 	public void startDocument() throws SAXException {
 		try {
-			tags = new ArrayList<String>(14);
+			tags = new HashSet<String>(14);
 			tags.add("Id");
 			tags.add("Name");
 			tags.add("City");
@@ -50,12 +49,11 @@ public class XmlHandler extends DefaultHandler {
 			tags.add("Timezone");
 			tags.add("Type");
 			tags.add("Source");
-			
+
 			csvSource = new FileWriter(csvPath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Override
@@ -99,10 +97,8 @@ public class XmlHandler extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 
-		for (String tag : tags) {
-			if (tag.equals(qName)) {
-				result += seperator;
-			}
+		if (tags.contains(qName)) {
+			result += seperator;
 		}
 
 		if (qName.equals(firstElement)) {
@@ -116,7 +112,7 @@ public class XmlHandler extends DefaultHandler {
 			}
 		}
 	}
-	
+
 	private void writeStringToCsv(String word) throws IOException {
 		csvSource.write(word + "\n");
 	}
