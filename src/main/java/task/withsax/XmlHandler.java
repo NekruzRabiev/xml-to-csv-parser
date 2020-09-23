@@ -9,7 +9,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Если все элементы с данными, то лучше использовать код из под комментариев. В
- * этом случае избавимся от HashSett-a
+ * этом случае избавимся от HashSet-a
  **/
 
 public class XmlHandler extends DefaultHandler {
@@ -68,30 +68,28 @@ public class XmlHandler extends DefaultHandler {
 //	@Override
 //	public void characters(char[] ch, int start, int length) throws SAXException {
 //		String str = new String(ch, start, length);
-//		if (!str.isBlank())
+//		if (!str.isBlank()) {
 //			result += str + seperator;
+//		}
 //	}
 //
 //	@Override
 //	public void endElement(String uri, String localName, String qName) throws SAXException {
 //
 //		if (qName.equals(firstElement)) {
-//			try {
-//				if (result.length() > 1) {
-//					writeStringToCsv(result.substring(0, result.length() - 1));
-//				}
-//				result = "";
-//			} catch (Exception e) {
-//				e.printStackTrace();
+//			if (result.length() > 1) {
+//				writeStringToCsv(result);
 //			}
+//			result = "";
 //		}
 //	}
 
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		String str = new String(ch, start, length);
-		if (!str.isBlank())
+		if (!str.isBlank()) {
 			result += str;
+		}
 	}
 
 	@Override
@@ -102,18 +100,18 @@ public class XmlHandler extends DefaultHandler {
 		}
 
 		if (qName.equals(firstElement)) {
-			try {
-				if (result.length() > 0) {
-					writeStringToCsv(result.substring(0, result.length() - 1));
-				}
-				result = "";
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (result.length() > 0) {
+				writeStringToCsv(result);
 			}
+			result = "";
 		}
 	}
 
-	private void writeStringToCsv(String word) throws IOException {
-		csvSource.write(word + "\n");
+	private void writeStringToCsv(String word) {
+		try {
+			csvSource.write(word.substring(0, result.length() - 1) + "\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
