@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -16,7 +17,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * этом случае избавимся от HashSet-a
  **/
 
-public class XmlHandler extends DefaultHandler {
+public class XmlHandlerJoin extends DefaultHandler {
 
 	private String csvPath;
 	private String firstElement;
@@ -27,9 +28,9 @@ public class XmlHandler extends DefaultHandler {
 
 	private FileWriter csvSource = null;
 	
-	private List<String> list = new ArrayList<String>(15);
+	private StringJoiner result = null;
 
-	public XmlHandler(String csvPath, String firstElement, String seperator) {
+	public XmlHandlerJoin(String csvPath, String firstElement, String seperator) {
 		this.csvPath = csvPath;
 		this.firstElement = firstElement;
 		this.seperator = seperator;
@@ -69,29 +70,34 @@ public class XmlHandler extends DefaultHandler {
 		}
 	}
 
+	
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		String str = new String(ch, start, length);
 		if (!str.isBlank()) {
-			list.add(str);
+			result.add(str);
 		}
+	}
+
+	@Override
+	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+		if (qName.contains(firstElement))
+			result = new StringJoiner(seperator, "", "\n");
 	}
 
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 
 		if (qName.equals(firstElement)) {
-			if (list.size() > 0) {
-				String result = String.join(seperator, list);
+			if (result.length() > 0) {
 				writeStringToCsv(result);
-				list.clear();
 			}
 		}
 	}
 
-	private void writeStringToCsv(String word) {
+	private void writeStringToCsv(StringJoiner line) {
 		try {
-			csvSource.write(word.toString() + "\n");
+			csvSource.write(line.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
